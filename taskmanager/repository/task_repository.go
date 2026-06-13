@@ -5,6 +5,12 @@ import (
 	"gogit/taskmanager/models"
 )
 
+type TaskStore interface {
+	GetTaskByID(id int) (models.Task, bool)
+	GetAllTasks() []models.Task
+	CreateTask(title string) models.Task
+	DeleteTaskByID(id int) bool
+}
 type TaskRepository struct {
 	tasks map[int]models.Task
 }
@@ -34,4 +40,17 @@ func (repo *TaskRepository) GetAllTasks() []models.Task {
 	}
 	fmt.Println(tasks)
 	return tasks
+}
+
+func (repo *TaskRepository) GetTaskByID(id int) (models.Task, bool) {
+	task, exists := repo.tasks[id]
+	return task, exists
+}
+
+func (repo *TaskRepository) DeleteTaskByID(id int) bool {
+	if _, exists := repo.tasks[id]; exists {
+		delete(repo.tasks, id)
+		return true
+	}
+	return false
 }

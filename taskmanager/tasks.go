@@ -16,7 +16,7 @@ func main() {
 	http.HandleFunc("/hello", helloHandler)
 	repo := repository.NewTaskRepository()
 	taskHandler := handlers.NewTaskHandler(repo)
-	http.HandleFunc("/tasks", taskHandler.GetTasks)
+	http.HandleFunc("/tasks", taskHandler.Tasks)
 
 	fmt.Println("Server is running on http://localhost:8080")
 

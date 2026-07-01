@@ -38,17 +38,6 @@ type Card struct {
 	Rank Rank
 }
 
-func (c *Card) Score() int {
-	switch c.Rank {
-	case ACE:
-		return 11
-	case JACK, QUEEN, KING:
-		return 10
-	default:
-		return int(c.Rank) + 1
-	}
-}
-
 func (c *Card) String() string {
 	rank := ""
 	suit := ""
@@ -111,7 +100,6 @@ func NewDeck() *Deck {
 		}
 	}
 	deck.Shuffle()
-	deck.Shuffle()
 	return deck
 }
 
@@ -130,38 +118,81 @@ func (d *Deck) Deal() (Card, bool) {
 	return c, true
 }
 
-type Hand struct {
-	Cards []Card
+type Hand interface {
+	AddCard(c Card)
+	Score() int
 }
 
-func (h *Hand) AddCard(c Card) {
-	h.Cards = append(h.Cards, c)
+type BlackjackHand struct {
+	cards []Card
 }
 
-func (h *Hand) Score() int {
+func (h *BlackjackHand) AddCard(c Card) {
+	h.cards = append(h.cards, c)
+}
+
+func (h *BlackjackHand) Score() int {
 	score := 0
-	for _, card := range h.Cards {
-		score += card.Score()
+	aces := 0
+	for _, card := range h.cards {
+		switch card.Rank {
+		case ACE:
+			aces++
+			score += 11
+		case JACK, QUEEN, KING:
+			score += 10
+		default:
+			score += int(card.Rank) + 1
+		}
+	}
+
+	for score > 21 && aces > 0 {
+		score -= 10
+		aces--
 	}
 	return score
 }
 
 type Player struct {
-	Hand *Hand
+	Hand Hand
 }
 
-func NewPlayer() *Player {
+func NewPlayer(h Hand) *Player {
 	return &Player{
-		Hand: &Hand{
-			Cards: make([]Card, 0),
-		},
+		Hand: h,
 	}
+}
+
+// GAME: BACCARAT ---
+type BaccaratHand struct {
+	cards []Card
+}
+
+func (h *BaccaratHand) AddCard(c Card) {
+	h.cards = append(h.cards, c)
+}
+
+func (h *BaccaratHand) Score() int {
+	score := 0
+	for _, card := range h.cards {
+		val := 0
+		switch card.Rank {
+		case ACE:
+			val = 1
+		case TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE:
+			val = int(card.Rank) + 1
+		case TEN, JACK, QUEEN, KING:
+			val = 0 // Face cards and 10s are worth 0 in Baccarat
+		}
+		score += val
+	}
+	return score % 10 // Baccarat score is modulo 10
 }
 
 func main() {
 	deck := NewDeck()
-	player1 := NewPlayer()
-	player2 := NewPlayer()
+	player1 := NewPlayer(&BlackjackHand{})
+	player2 := NewPlayer(&BlackjackHand{})
 	for i := range 52 {
 		card, ok := deck.Deal()
 		if !ok {

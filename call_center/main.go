@@ -220,6 +220,15 @@ func (cc *CallCenter) DispatchNewCall(call *Call) {
 	cc.newCallChan <- call
 }
 
+func (cc *CallCenter) findFree(employees []Employee) Employee {
+	for _, e := range employees {
+		if e.IsFree() {
+			return e
+		}
+	}
+	return nil
+}
+
 func (cc *CallCenter) dispatch(call *Call) {
 	var emp Employee
 
@@ -253,15 +262,6 @@ func (cc *CallCenter) dispatch(call *Call) {
 			}
 		}(emp, call)
 	}
-}
-
-func (cc *CallCenter) findFree(employees []Employee) Employee {
-	for _, e := range employees {
-		if e.IsFree() {
-			return e
-		}
-	}
-	return nil
 }
 
 // processQueue re-evaluates the queue when an employee frees up

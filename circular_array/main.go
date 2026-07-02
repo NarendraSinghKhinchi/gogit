@@ -28,7 +28,7 @@ func (ca *CustomArray[T]) Get(idx int) T {
 
 func (ca *CustomArray[T]) Rotate(offset int) {
 	size := len(ca.arr)
-	newOffset := (ca.offset + offset) % size
+	newOffset := (ca.offset - offset) % size
 	if newOffset < 0 {
 		newOffset += size
 	}
@@ -37,27 +37,29 @@ func (ca *CustomArray[T]) Rotate(offset int) {
 
 func main() {
 	ca := NewArray[int](5)
-	
+
 	ca.Set(1, 0)
 	ca.Set(2, 1)
 	ca.Set(3, 2)
 	ca.Set(4, 3)
 	ca.Set(5, 4)
 
-	fmt.Println("Initial:")
-	for i := 0; i < 5; i++ {
-		fmt.Printf("Get(%d): %d\n", i, ca.Get(i))
-	}
+	printArray("Initial:", ca)
 
 	ca.Rotate(2)
-	fmt.Println("\nAfter Rotate(2):")
-	for i := 0; i < 5; i++ {
-		fmt.Printf("Get(%d): %d\n", i, ca.Get(i))
-	}
+	printArray("After Rotate(2) [Left shift by 2]:", ca)
 
 	ca.Rotate(-1)
-	fmt.Println("\nAfter Rotate(-1):")
+	printArray("After Rotate(-1) from initial [Right shift by 1]:", ca)
+
+	ca.Rotate(-1) // cumulative -2
+	printArray("After Rotate(-2) from initial [Right shift by 2]:", ca)
+}
+
+func printArray(msg string, ca *CustomArray[int]) {
+	fmt.Println(msg)
 	for i := 0; i < 5; i++ {
-		fmt.Printf("Get(%d): %d\n", i, ca.Get(i))
+		fmt.Printf("%d ", ca.Get(i))
 	}
+	fmt.Println("\n")
 }
